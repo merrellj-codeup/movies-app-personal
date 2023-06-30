@@ -1,3 +1,4 @@
+import { getFavMovies, getSpotlightMovies } from "./movies-api.js";
 import { featuredMovies, FeaturedMovie, handleArrowKeys } from "./components/MovieFeatured/index.js";
 import SpotlightMovie from "./components/MovieCard/index.js";
 import MovieSearch from "./components/MovieSearch/index.js";

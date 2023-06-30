@@ -13,15 +13,19 @@ let db = new FirebaseDatabase({
 // Here is a function that uses the "db.fetch()" method to make a
 // GET request to the "/movies" endpoint:
 const getFavMovies = async () => {
-    const url = '/movies';
+    // const url = '/movies';
+    const url = `http://localhost:3000/favorites`;
     const options = {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         }
     };
-    let response = await db.fetch(url, options);
-    return await response.json();
+    // let response = await db.fetch(url, options);
+    let response = await fetch(url, options);
+    let data = await response.json();
+    console.log(data);
+    return data;
 }
 
 // And here is a function that will add a new movie:
@@ -70,3 +74,58 @@ const getSpotlightMovies = async (genre) => {
     console.log('Spotlight Movies =>', movies.results);
     return movies.results;
 }
+
+const getMovieCredits = async (movieId) => {
+    let url = `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${keys.tmdb}&language=en-US`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    };
+    let response = await fetch(url, options);
+    let credits = await response.json();
+    return credits;
+}
+
+const getMovieVideos = async (movieId) => {
+    let url = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${keys.tmdb}&language=en-US`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    };
+    let response = await fetch(url, options);
+    let videos = await response.json();
+    return videos;
+}
+
+const postFavoriteMovie = async (movie) => {
+    const url = `http://localhost:3000/favorites`;
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(movie),
+    };
+    let response = await fetch(url, options);
+    return await response.json();
+}
+
+const deleteFavoriteMovie = async (movieId) => {
+    const url = `http://localhost:3000/favorites/${movieId}`;
+    const options = {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    };
+    let response = await fetch(url, options);
+    return await response.json();
+}
+
+
+
+export { getFavMovies, addFavMovie, getSpotlightMovies, getMovieCredits, getMovieVideos, postFavoriteMovie, deleteFavoriteMovie };

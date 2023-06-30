@@ -1,3 +1,4 @@
+import { getMovieCredits, getMovieVideos, postFavoriteMovie, getFavMovies } from "../../movies-api.js";
 class SpotlightMovie {
     constructor(data, target) {
         this.target = target;
@@ -7,22 +8,24 @@ class SpotlightMovie {
         this.vote_average = data.vote_average;
         this.vote_count = data.vote_count;
         this.video = data.videos;
+        this.overview = data.overview;
         this.element = document.createElement('div');
         this.element.classList.add('movie-wrapper');
         this.element.setAttribute('data-movie', this.id);
         this.element.movie = this;
-        this.render(target);
-        // add a click event to the .movie-hover-play
-        this.element.querySelector('.movie-hover-play').addEventListener('click', this.handleTrailerClick.bind(this));
+        this.credits = null;
+        if (this.poster_path) {
+            this.render(target);
+            // add a click event to the .movie-hover-play
+            this.element.querySelector('.add-to-favorites').addEventListener('click', this.addToFavorites.bind(this));
+        }
     }
     render(target) {
         let html = `
             <div class="movie-poster-wrapper">
                 <img src="https://image.tmdb.org/t/p/original${this.poster_path}" loading="lazy" alt="" class="movie-poster-image">
                 <div class="movie-poster-hover">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1200pt" height="1200pt" version="1.1" viewBox="0 0 1200 1200" class="movie-hover-play">
-                        <path d="m600 99.996c132.61 0 259.79 52.68 353.55 146.45 93.77 93.766 146.45 220.95 146.45 353.55s-52.68 259.79-146.45 353.55c-93.766 93.77-220.95 146.45-353.55 146.45s-259.79-52.68-353.55-146.45c-93.77-93.766-146.45-220.95-146.45-353.55 0.14844-132.56 52.875-259.66 146.61-353.39 93.738-93.734 220.83-146.46 353.39-146.61zm0-99.996c-159.13 0-311.74 63.215-424.27 175.73-112.52 112.52-175.73 265.14-175.73 424.27s63.215 311.74 175.73 424.27c112.52 112.52 265.14 175.73 424.27 175.73s311.74-63.215 424.27-175.73c112.52-112.52 175.73-265.14 175.73-424.27s-63.215-311.74-175.73-424.27c-112.52-112.52-265.14-175.73-424.27-175.73zm-150 850v-499.99l450 257.29z" fill="#fff"/>
-                    </svg>
+                    <div class="button add-to-favorites">Add to Favorites</div> 
                 </div>
             </div>
             <h3>${this.title}</h3>
@@ -148,6 +151,37 @@ class SpotlightMovie {
         closeButton.addEventListener('click', () => {
             backdrop.remove();
         });
+    }
+    async addToFavorites() {
+        // Step 1. Check if movie is already in favorites
+        // Step 2. Get the credits for the movie from themoviedb and save it to this.credits
+        // Step 3. Get the videos for the movie from themoviedb and save it to this.videos
+        // Step 4. POST the movie to localhost:3000/favorites
+        let favorites = await getFavMovies();
+        let copy = favorites.find(movie => movie.original_title === this.title);
+        if (copy) {
+            alert('This movie is already in your favorites');
+            return;
+        }
+        let credits = await getMovieCredits(this.id);
+        this.credits = credits;
+        let videos = await getMovieVideos(this.id);
+        this.videos = videos;
+        let movie = {
+            id: this.id,
+            original_title: this.title,
+            poster_path: this.poster_path,
+            rating: this.rating,
+            overview: this.overview,
+            release_date: this.release_date,
+            credits: this.credits,
+            videos: this.videos,
+            vote_average: this.vote_average,
+            vote_count: this.vote_count
+        }
+        let response = await postFavoriteMovie(movie);
+        console.log(response);
+
     }
 
 }

@@ -1,13 +1,13 @@
-import { featuredMovies, FeaturedMovie, handleArrowKeys } from "./components/MovieFeatured/index.js";
+import { getFavMovies, getSpotlightMovies } from "./movies-api.js";
+import { featuredMovies, FeaturedMovie, handleArrowKeys, handleSlideTimer } from "./components/MovieFeatured/index.js";
 import SpotlightMovie from "./components/MovieCard/index.js";
 import MovieSearch from "./components/MovieSearch/index.js";
 
 (async () => {
-    // This is the entry point for your application. Write all of your code here.
-    // Before you can use the database, you need to configure the "db" object 
-    // with your team name in the "js/movies-api.js" file.
     let search = new MovieSearch();
-    const movies = await getFavMovies();
+    let movies = await getFavMovies();
+    movies = movies.filter(movie => movie.credits);
+    console.log(movies);
     for (let movie of movies) {
         let featuredMovie = new FeaturedMovie(movie);
     }
@@ -16,18 +16,20 @@ import MovieSearch from "./components/MovieSearch/index.js";
     //render the featured movies
     featuredMovies.forEach((movie, index) => {
         // if the movie is in the center of the list, run it's render method with no arguments. At least one movie will be in the center of the list.
-        // if the movie is in the first half of the list, run it's render method with a 'left' argument
-        // if the movie is in the second half of the list, run it's render method with a 'right' argument
         if (index === Math.floor(featuredMovies.length / 2)) {
             movie.render();
         }
+        // if the movie is in the first half of the list, run it's render method with a 'left' argument
         else if (index < Math.floor(featuredMovies.length / 2)) {
             movie.render('left');
         }
+        // if the movie is in the second half of the list, run it's render method with a 'right' argument
         else {
             movie.render('right');
         }
     });
+    //start the timer to handle the slide show
+    setInterval(handleSlideTimer, 30000);
     console.log("Featured Movies =>", featuredMovies);
     document.addEventListener("keydown", handleArrowKeys);
     let tmdbMovies = await getSpotlightMovies('action');

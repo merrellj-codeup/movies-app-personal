@@ -70,3 +70,5 @@ const getSpotlightMovies = async (genre) => {
     console.log('Spotlight Movies =>', movies.results);
     return movies.results;
 }
+
+export { getFavMovies, addFavMovie, getSpotlightMovies };

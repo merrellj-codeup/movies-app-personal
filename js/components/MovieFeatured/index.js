@@ -1,11 +1,34 @@
+import { deleteFavoriteMovie } from "../../movies-api.js";
+
 let featuredMovies = [];
 
 const handleArrowKeys = (e) => {
     if(e.keyCode === 37){ //left
-        document.querySelector('[data-featured="center"').previousElementSibling.click();
+        let previousSibling = document.querySelector('[data-featured="center"').previousElementSibling;
+        if(previousSibling){
+            previousSibling.click();
+        } else {
+            document.querySelector('[data-featured="center"').parentElement.lastElementChild.click();
+        }
     }
     else if(e.keyCode === 39){ //right
-        document.querySelector('[data-featured="center"').nextElementSibling.click();
+        let nextSibling = document.querySelector('[data-featured="center"').nextElementSibling;
+        if(nextSibling){
+            nextSibling.click();
+        }
+        else {
+            document.querySelector('[data-featured="center"').parentElement.firstElementChild.click();
+        }
+    }
+};
+
+const handleSlideTimer = () => {
+    let nextSibling = document.querySelector('[data-featured="center"').nextElementSibling;
+    if(nextSibling){
+        nextSibling.click();
+    }
+    else {
+        document.querySelector('[data-featured="center"').parentElement.firstElementChild.click();
     }
 };
 
@@ -18,8 +41,8 @@ class FeaturedMovie {
         this.releaseDate = data.release_date;
         this.vote_average = data.vote_average;
         this.vote_count = data.vote_count;
-        this.cast = data.credits.cast;
-        this.video = data.videos.results[0];
+        this.cast = data.credits?.cast;
+        this.video = data.videos?.results[0];
         this.element = document.createElement('div');
         this.element.classList.add('featured-movie-3d-parent');
         this.element.setAttribute('data-featured-movie', this.id);
@@ -71,7 +94,7 @@ class FeaturedMovie {
         `;
         this.element.innerHTML = html;
         document.querySelector('.featured-movies').appendChild(this.element);
-        this.element.addEventListener('click', this.handleSliderClick);
+        this.element.addEventListener('click', this.handleSliderClick.bind(this));
         // Add event listener to delete button
         // bind this to the handleDelete function
         this.element.querySelector('.delete').addEventListener('click', this.handleDelete.bind(this));
@@ -150,7 +173,7 @@ class FeaturedMovie {
         if (votes < 1000) {
             return votes;
         }
-        let votesString = votes.toString();
+        let votesString = parseInt(votes).toString();
         let votesArray = votesString.split('');
         let votesArrayReversed = votesArray.reverse();
         let votesArrayWithCommas = [];
@@ -169,7 +192,7 @@ class FeaturedMovie {
         let cast = this.cast;
         let castWrapper = document.createElement('div');
         castWrapper.classList.add('cast-wrapper');
-        cast.forEach((member, index) => {
+        cast?.forEach((member, index) => {
             if (index < 5) {
                 let castMember = document.createElement('div');
                 castMember.classList.add('cast-avatar-wrapper');
@@ -180,7 +203,7 @@ class FeaturedMovie {
             }
         });
         // if there are more than 5 cast members, add a div with a + sign
-        if (cast.length > 5) {
+        if (cast?.length > 5) {
             let castMember = document.createElement('div');
             let castMemberCount = cast.length - 5;
             castMember.classList.add('cast-avatar-wrapper');
@@ -196,54 +219,46 @@ class FeaturedMovie {
     }
     handleSliderClick(e) {
         // get the first parent with a class of .featured-movie-3d-parent
-        let card = e.path.find(element => {
-            if (element.classList && element.classList.contains('featured-movie-3d-parent')) {
-                return true;
+        // console.log(e);
+        let activeCard = this.element;
+        activeCard.setAttribute('data-featured', 'center');
+        activeCard.classList.remove('right', 'left');
+        activeCard.children[0].classList.remove('left', 'right');
+        let previousCard = activeCard.previousElementSibling;
+        let previousCards = [];
+        while (previousCard) {
+            previousCards.push(previousCard);
+            previousCard = previousCard.previousElementSibling;
+        }
+        previousCards.forEach((card, index) => {
+            card.setAttribute('data-featured', '');
+            card.classList.add('left');
+            card.style.zIndex = 1;
+            if (card.children[0] && card.children[0].classList.contains('featured-movie-3d-child')) {
+                card.children[0].classList.add('left');
+                card.children[0].classList.remove('right');
             }
+            card.classList.remove('right');
         });
-        card.setAttribute('data-featured', 'center');
-        if (card.classList.contains('left')){
-            let zindex = 10;
-            let element = card.nextElementSibling;
-            while (element) {
-                element.setAttribute('data-featured', '');
-                element.classList.add('right');
-                element.style.zIndex = zindex;
-                zindex--;
-                if (element.children[0] && element.children[0].classList.contains('featured-movie-3d-child')) {
-                    element.children[0].classList.add('right');
-                }
-                element.classList.remove('left');
-                if (element.children[0] && element.children[0].classList.contains('featured-movie-3d-child')) {
-                    element.children[0].classList.remove('left');
-                }
-                element = element.nextElementSibling;
+
+        let nextCard = activeCard.nextElementSibling;
+        let nextCards = [];
+        while (nextCard) {
+            nextCards.push(nextCard);
+            nextCard = nextCard.nextElementSibling;
+        }
+        nextCards.forEach((card, index) => {
+            card.setAttribute('data-featured', '');
+            card.classList.add('right');
+            card.style.zIndex = nextCards.length - index;
+            if (card.children[0] && card.children[0].classList.contains('featured-movie-3d-child')) {
+                card.children[0].classList.add('right');
+                card.children[0].classList.remove('left');
             }
-        } else if (card.classList.contains('right')){
-            let element = card.previousElementSibling;
-            while (element) {
-                element.setAttribute('data-featured', '');
-                element.classList.add('left')
-                if (element.children[0] && element.children[0].classList.contains('featured-movie-3d-child')) {
-                    element.children[0].classList.add('left');
-                }
-                element.classList.remove('right');
-                if (element.children[0] && element.children[0].classList.contains('featured-movie-3d-child')) {
-                    element.children[0].classList.remove('right');
-                }
-                element = element.previousElementSibling;
-            }
-        }
-        card.style.zIndex = '11';
-        card.classList.remove('right');
-        if (card.children[0] && card.children[0].classList.contains('featured-movie-3d-child')) {
-            card.children[0].classList.remove('right');
-        }
-        card.classList.remove('left');
-        if (card.children[0] && card.children[0].classList.contains('featured-movie-3d-child')) {
-            card.children[0].classList.remove('left');
-        }
-        card.movie.handleBGVideoRender();
+            card.classList.remove('left');
+        });
+        activeCard.style.zIndex = nextCards.length + 1;
+        activeCard.movie.handleBGVideoRender();
     }
     handleBGVideoRender() {
         // remove any existing video
@@ -321,6 +336,7 @@ class FeaturedMovie {
                     this.element.remove();
                     this.element = null;
                     sibling.click();
+                    deleteFavoriteMovie(this.id);
                 }, 300);
             }, 300);
         }, 300);
@@ -330,4 +346,4 @@ class FeaturedMovie {
     }
 }
 
-export { featuredMovies, handleArrowKeys, FeaturedMovie };
+export { featuredMovies, handleArrowKeys, handleSlideTimer, FeaturedMovie };

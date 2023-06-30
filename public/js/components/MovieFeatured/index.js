@@ -71,7 +71,7 @@ class FeaturedMovie {
         `;
         this.element.innerHTML = html;
         document.querySelector('.featured-movies').appendChild(this.element);
-        this.element.addEventListener('click', this.handleSliderClick);
+        this.element.addEventListener('click', this.handleSliderClick.bind(this));
         // Add event listener to delete button
         // bind this to the handleDelete function
         this.element.querySelector('.delete').addEventListener('click', this.handleDelete.bind(this));
@@ -196,11 +196,8 @@ class FeaturedMovie {
     }
     handleSliderClick(e) {
         // get the first parent with a class of .featured-movie-3d-parent
-        let card = e.path.find(element => {
-            if (element.classList && element.classList.contains('featured-movie-3d-parent')) {
-                return true;
-            }
-        });
+        console.log(e);
+        let card = this.element;
         card.setAttribute('data-featured', 'center');
         if (card.classList.contains('left')){
             let zindex = 10;
