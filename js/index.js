@@ -4,10 +4,14 @@ import SpotlightMovie from "./components/MovieCard/index.js";
 import MovieSearch from "./components/MovieSearch/index.js";
 
 (async () => {
+    // create a new instance of the MovieSearch class
+    // this will render the search bar and handle the search functionality
     let search = new MovieSearch();
+    // get the user's favorite movies from json-server
     let movies = await getFavMovies();
+    // filter out any movies that don't have a credits property
     movies = movies.filter(movie => movie.credits);
-    console.log(movies);
+    // create a new FeaturedMovie instance for each movie
     for (let movie of movies) {
         let featuredMovie = new FeaturedMovie(movie);
     }
@@ -31,9 +35,12 @@ import MovieSearch from "./components/MovieSearch/index.js";
     //start the timer to handle the slide show
     setInterval(handleSlideTimer, 30000);
     console.log("Featured Movies =>", featuredMovies);
+    // add an event listener to the document to handle the arrow keys
     document.addEventListener("keydown", handleArrowKeys);
+    // get the spotlight movies from the TMDB API
     let tmdbMovies = await getSpotlightMovies('action');
     let movieGrid = document.querySelector('.movie-grid');
+    // create a new SpotlightMovie instance for each movie
     tmdbMovies.forEach(movie => {
         let newMovie = new SpotlightMovie(movie, movieGrid);
     });
