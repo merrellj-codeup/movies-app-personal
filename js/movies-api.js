@@ -1,71 +1,88 @@
-// In this project, we will be using a Firebase database to store our movie data.
-// Configuring Firebase is more involved than what is covered in this lesson,
-// so we have provided a class that will handle the configuration for you.
-let db = new FirebaseDatabase({
-    team: "merrell" // Replace this with your team name
-});
+import keys from './keys.js';
 
-// You will use the "db" object to make requests to the database very similarly to how you
-// would use the "fetch" function to make requests to an API. The only difference is that
-// you will be adding "db" in front of the "fetch" function.
-// Example: db.fetch(url, options);
+const firebaseConfig = {
+    apiKey: keys.firebase,
+    authDomain: "codeup-curriculum.firebaseapp.com",
+    databaseURL: "https://codeup-curriculum-default-rtdb.firebaseio.com",
+    projectId: "codeup-curriculum",
+    storageBucket: "codeup-curriculum.appspot.com",
+    messagingSenderId: "374518315918",
+    appId: "1:374518315918:web:e7417b3a5070a0089c82df",
+    measurementId: "G-HJL17B39JL"
+};
 
-// Here is a function that uses the "db.fetch()" method to make a
-// GET request to the "/movies" endpoint:
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore().collection('movies');
+
+
 const getFavMovies = async () => {
-    // const url = '/movies';
-    const url = `http://localhost:3000/favorites`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    };
-    // let response = await db.fetch(url, options);
-    try {
-        let response = await fetch(url, options);
-        let data = await response.json();
-        console.log(data);
-        return data;
-    } catch (error) {
-        console.log(error);
-        alert(`Please start the json-server. Type "json-server --watch db.json" in the terminal.`);
-    }
+    // const url = `http://localhost:3000/favorites`;
+    // const options = {
+    //     method: 'GET',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     }
+    // };
+    // try {
+    //     let response = await fetch(url, options);
+    //     let data = await response.json();
+    //     console.log(data);
+    //     return data;
+    // } catch (error) {
+    //     console.log(error);
+    //     alert(`Please start the json-server. Type "json-server --watch db.json" in the terminal.`);
+    // }
+    const response = await db.get();
+    const movies = await response.docs.map(doc => doc.data());
+    return movies;
 }
-
-// And here is a function that will add a new movie:
-const addFavMovie = async (movie) => {
-    // "movie" is an object that contains the movie data
-    // Example: {title: "The Matrix", year: 1999, rating: 5}
-    // You do NOT need to add an id to the movie object.
-    // After the movie is added to the database, the database will
-    // automatically add an id to the movie object and return it.
-    const url = '/movies';
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(movie),
-    };
-    let response = await db.fetch(url, options);
-    return await response.json();
+const postFavoriteMovie = async (movie) => {
+    // const url = `http://localhost:3000/favorites`;
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(movie),
+    // };
+    // let response = await fetch(url, options);
+    // return await response.json();
+    console.log(movie)
+    await db.add(movie);
+    // get the document that was just added
+    const snapshot = await db.get(movie.id);
+    
 }
-
-// Here is where you will create your own functions to further interact with the database.
-// HAPPY CODING!!!
+const patchFavMovie = async (movie) => {
+    // const url = `http://localhost:3000/favorites/${movie.id}`;
+    // const options = {
+    //     method: 'PATCH',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(movie),
+    // };
+    // let response = await fetch(url, options);
+    // return await response.json();
+    const response = await db.doc(movie.id).update(movie);
+    // get the document that was just updated
+    const snapshot = await db.doc(movie.id).get();
+    const updatedMovie = await snapshot.data();
+    return updatedMovie;
+}
 
 // Get featured movies from https://www.themoviedb.org/ API
-const getSpotlightMovies = async (genre) => {
+const getSpotlightMovies = async (genre, page) => {
     // "genre" is a string that contains the genre of the movie
     // if no genre is provided, then the function will return now playing movies
     // Example: "Action", "Comedy", "Horror", etc.
     let url;
+    let nextPage = page || 1;
     if (genre) {
-        url = `https://api.themoviedb.org/3/discover/movie?api_key=${keys.tmdb}&language=en-US&sort_by=popularity.desc&include_adult=false&include_videos=true&page=1&with_genres=${genre}`;
+        url = `https://api.themoviedb.org/3/discover/movie?api_key=${keys.tmdb}&language=en-US&sort_by=popularity.desc&include_adult=false&include_videos=true&page=${nextPage}&with_genres=${genre}`;
     }
     else {
-        url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${keys.tmdb}&include_adult=false&include_videos=true&language=en-US&page=1`;
+        url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${keys.tmdb}&include_adult=false&include_videos=true&language=en-US&page=${nextPage}`;
     }
     const options = {
         method: 'GET',
@@ -76,7 +93,7 @@ const getSpotlightMovies = async (genre) => {
     let response = await fetch(url, options);
     let movies = await response.json();
     
-    console.log('Spotlight Movies =>', movies.results);
+    console.log('Spotlight Movies =>', movies);
     return movies.results;
 }
 
@@ -115,31 +132,23 @@ const getMovieVideos = async (movieId) => {
     return videos;
 }
 
-const postFavoriteMovie = async (movie) => {
-    const url = `http://localhost:3000/favorites`;
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(movie),
-    };
-    let response = await fetch(url, options);
-    return await response.json();
-}
-
 const deleteFavoriteMovie = async (movieId) => {
-    const url = `http://localhost:3000/favorites/${movieId}`;
-    const options = {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    };
-    let response = await fetch(url, options);
-    return await response.json();
+    // const url = `http://localhost:3000/favorites/${movieId}`;
+    // const options = {
+    //     method: 'DELETE',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     }
+    // };
+    // let response = await fetch(url, options);
+    // return await response.json();
+    const response = await db.doc(`${movieId}`).delete().then(() => {
+        console.log("Document successfully deleted!");
+    }).catch((error) => {
+        console.error("Error removing document: ", error);
+    });
 }
 
 
 
-export { getFavMovies, addFavMovie, getSpotlightMovies, getMovieCredits, getMovieVideos, postFavoriteMovie, deleteFavoriteMovie };
+export { getFavMovies, getSpotlightMovies, getMovieCredits, getMovieVideos, postFavoriteMovie, deleteFavoriteMovie, patchFavMovie };

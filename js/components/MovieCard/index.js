@@ -9,6 +9,7 @@ class SpotlightMovie {
         this.vote_average = data.vote_average;
         this.vote_count = data.vote_count;
         this.video = data.videos;
+        this.release_date = data.release_date;
         this.overview = data.overview;
         this.element = document.createElement('div');
         this.element.classList.add('movie-wrapper');
@@ -181,7 +182,6 @@ class SpotlightMovie {
             id: this.id,
             original_title: this.title,
             poster_path: this.poster_path,
-            rating: this.rating,
             overview: this.overview,
             release_date: this.release_date,
             credits: this.credits,
@@ -195,6 +195,8 @@ class SpotlightMovie {
             let featuredMovie = new FeaturedMovie(movie);
             featuredMovies.push(featuredMovie);
             featuredMovie.render('right');
+            // trigger click event on featuredMovie.element
+            featuredMovie.element.click();
             document.querySelector('.search-wrapper').focusout();
         } catch (error) {
             console.log(error);

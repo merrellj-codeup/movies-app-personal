@@ -11,6 +11,7 @@ import MovieSearch from "./components/MovieSearch/index.js";
     let search = new MovieSearch();
     // get the user's favorite movies from json-server
     let movies = await getFavMovies();
+    console.log(movies);
     // filter out any movies that don't have a credits property
     movies = movies.filter(movie => movie.credits);
     // create a new FeaturedMovie instance for each movie
@@ -40,13 +41,14 @@ import MovieSearch from "./components/MovieSearch/index.js";
     // add an event listener to the document to handle the arrow keys
     document.addEventListener("keydown", handleArrowKeys);
     // get the spotlight movies from the TMDB API
-    let tmdbMovies = await getSpotlightMovies();
+    let tmdbMovies = await getSpotlightMovies("", 1);
     const movieGrid = document.querySelector('.movie-grid');
     // create a new SpotlightMovie instance for each movie
     tmdbMovies.forEach(movie => {
         let newMovie = new SpotlightMovie(movie, movieGrid);
     });
 
+    let nextPage = 1;
     const splotlightTabs = document.querySelectorAll('.section-tab');
     for (let tab of splotlightTabs) {
         tab.addEventListener('click', async (e) => {
@@ -58,6 +60,22 @@ import MovieSearch from "./components/MovieSearch/index.js";
             newMovies.forEach(movie => {
                 let newMovie = new SpotlightMovie(movie, movieGrid);
             });
+            nextPage = 1;
         });
     }
+    
+    // if you scroll to the bottom of #spotlightMovies in the body, then load more movies
+    const spotlightMovies = document.querySelector('#spotlightMovies');
+    document.addEventListener('scroll', async (e) => {
+        if (window.scrollY + window.innerHeight >= spotlightMovies.offsetTop + spotlightMovies.offsetHeight) {
+            nextPage++;
+            let genre = document.querySelector('.section-tab.active').getAttribute('data-genre');
+            let newMovies = await getSpotlightMovies(genre, nextPage);
+            newMovies.forEach(movie => {
+                let newMovie = new SpotlightMovie(movie, movieGrid);
+            });
+        }
+    });
+
+    
 })();

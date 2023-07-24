@@ -67,7 +67,7 @@
           </div>
         </div>
         <div class="row">
-            <div class="movie-grid">
+            <div class="movie-grid" id="spotlightMovies">
                 
             </div>
         </div>
@@ -76,16 +76,6 @@
 <!-- The core Firebase JS SDK and Databse library -->
 <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-firestore.js"></script>
-
-<!-- A local JS file to store the firebase API Key. WARNING: Do not commit this file -->
-<script src="js/keys.js"></script>
-
-<!-- Utilities and higher level functions to simplify database fetches -->
-<script src="js/firebase-config.js"></script>
-
-<!-- Your local JS file to add functions that interact with the database -->
-<!-- I moved to a module syntax with index.js to import this dynamically -->
-<!-- <script src="js/movies-api.js"></script> -->
 
 <!-- Your local JS file to add functions that USE your functions from movies-api.js
     and INTERACT with the DOM -->

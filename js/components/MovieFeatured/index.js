@@ -1,4 +1,4 @@
-import { deleteFavoriteMovie } from "../../movies-api.js";
+import { deleteFavoriteMovie, patchFavMovie } from "../../movies-api.js";
 
 let featuredMovies = [];
 
@@ -122,11 +122,11 @@ class FeaturedMovie {
                 <div class="edit-movie-bg"></div>
                 <div class="row justify-center">
                     <form class="column shrink" id="editMovie">
-                        <h2 class="form-title">Edit ${this.original_title}</h2>
-                        <label>
+                        <h2 class="form-title">Edit Overview for ${this.original_title}</h2>
+                        <!-- <label>
                             <span>Title</span>
                             <input type="text" name="title" id="editTitle" value="${this.original_title}">
-                        </label>
+                        </label> -->
                         <label>
                             <span>Description</span>
                             <textarea name="description" id="editDescription">${this.overview}</textarea>
@@ -139,31 +139,25 @@ class FeaturedMovie {
                 </div>
             `;
             const cancel = modal.querySelector('.button.delete');
+            const bgCancel = modal.querySelector('.edit-movie-bg');
             cancel.addEventListener('click', () => {
+                modal.remove();
+            });
+            bgCancel.addEventListener('click', () => {
                 modal.remove();
             });
             const form = modal.querySelector('#editMovie');
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const title = form.querySelector('#editTitle').value;
+                // const title = form.querySelector('#editTitle').value;
                 const description = form.querySelector('#editDescription').value;
                 const movie = {
                     id: this.id,
-                    original_title: title,
+                    // original_title: title,
                     overview: description
                 };
-                const url = `http://localhost:3000/favorites/${this.id}`;
-                const options = {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(movie),
-                };
-                let response = await fetch(url, options);
-                let updatedMovie = await response.json();
-                this.original_title = updatedMovie.original_title;
-                this.overview = updatedMovie.overview;
+                const updatedMovie = await patchFavMovie(movie);
+                this.overview = description;
                 this.element.querySelector('.featured-movie-description').innerHTML = this.overview;
                 this.element.querySelector('h3').innerHTML = this.original_title;
                 modal.remove();

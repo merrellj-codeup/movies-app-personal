@@ -1,4 +1,5 @@
 import MovieCard from '../MovieCard/index.js';
+import keys from '../../keys.js';
 
 class MovieSearch {
     constructor() {
