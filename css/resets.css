@@ -50,6 +50,9 @@ body {
 .row.align-center {
     align-items: center;
 }
+.row.justify-center {
+    justify-content: center;
+}
 /* COLUMNS WILL, BY DEFAULT, SHARE SPACE EQUALLY HORIZONTALLY WITHIN THE ROW WITH
    THEIR SIBLINGS. CONTENT PUT INSIDE THEM WILL STACK VERTICALLY. */
 .column {
@@ -68,4 +71,8 @@ body {
 /* OPTIONAL COMBO CLASS TO MAKE A COLUMN SHRINK INSTEAD OF GROW */
 .column.col-shrink {
     flex: 0 1 auto;
+}
+
+.gap-10 {
+    gap: 10px;
 }

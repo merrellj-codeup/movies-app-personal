@@ -22,10 +22,15 @@ const getFavMovies = async () => {
         }
     };
     // let response = await db.fetch(url, options);
-    let response = await fetch(url, options);
-    let data = await response.json();
-    console.log(data);
-    return data;
+    try {
+        let response = await fetch(url, options);
+        let data = await response.json();
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.log(error);
+        alert(`Please start the json-server. Type "json-server --watch db.json" in the terminal.`);
+    }
 }
 
 // And here is a function that will add a new movie:
@@ -98,6 +103,15 @@ const getMovieVideos = async (movieId) => {
     };
     let response = await fetch(url, options);
     let videos = await response.json();
+    // sort the videos so that the trailer is first
+    videos.results.sort((a, b) => {
+        if (a.type === 'Trailer') {
+            return -1;
+        }
+        else {
+            return 1;
+        }
+    });
     return videos;
 }
 

@@ -4,6 +4,8 @@ import SpotlightMovie from "./components/MovieCard/index.js";
 import MovieSearch from "./components/MovieSearch/index.js";
 
 (async () => {
+    // set a cookie to prevent the browser from blocking the fetch requests to the TMDB API
+    document.cookie = "cookie_name=cookie_value; samesite=lax";
     // create a new instance of the MovieSearch class
     // this will render the search bar and handle the search functionality
     let search = new MovieSearch();
@@ -33,15 +35,29 @@ import MovieSearch from "./components/MovieSearch/index.js";
         }
     });
     //start the timer to handle the slide show
-    setInterval(handleSlideTimer, 30000);
+    // const sliderTimer = setInterval(handleSlideTimer, 5000);
     console.log("Featured Movies =>", featuredMovies);
     // add an event listener to the document to handle the arrow keys
     document.addEventListener("keydown", handleArrowKeys);
     // get the spotlight movies from the TMDB API
-    let tmdbMovies = await getSpotlightMovies('action');
-    let movieGrid = document.querySelector('.movie-grid');
+    let tmdbMovies = await getSpotlightMovies();
+    const movieGrid = document.querySelector('.movie-grid');
     // create a new SpotlightMovie instance for each movie
     tmdbMovies.forEach(movie => {
         let newMovie = new SpotlightMovie(movie, movieGrid);
     });
+
+    const splotlightTabs = document.querySelectorAll('.section-tab');
+    for (let tab of splotlightTabs) {
+        tab.addEventListener('click', async (e) => {
+            splotlightTabs.forEach(tab => tab.classList.remove('active'));
+            tab.classList.add('active');
+            let genre = tab.getAttribute('data-genre');
+            let newMovies = await getSpotlightMovies(genre);
+            movieGrid.innerHTML = '';
+            newMovies.forEach(movie => {
+                let newMovie = new SpotlightMovie(movie, movieGrid);
+            });
+        });
+    }
 })();

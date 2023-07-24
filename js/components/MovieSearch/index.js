@@ -19,9 +19,19 @@ class MovieSearch {
         this.input.addEventListener('input', this.handleDebounce.bind(this));
         this.input.moviesearch = this;
         this.render();
+        this.wrapper.focusout = this.handleFocusOut.bind(this);
     }
     render() {
         this.wrapper.appendChild(this.input);
+        const close = document.createElement('div');
+        close.classList.add('close-button');
+        close.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" viewBox="0 0 16 16">
+                <path fillRule="evenodd" d="M8 6.586L2.707 1.293 1.293 2.707 6.586 8l-5.293 5.293 1.414 1.414L8 9.414l5.293 5.293 1.414-1.414L9.414 8l5.293-5.293-1.414-1.414z"/>
+            </svg>
+        `;
+        close.addEventListener('click', this.handleFocusOut.bind(this));
+        this.wrapper.appendChild(close);
         document.querySelector('.navigation-wrapper').appendChild(this.wrapper);
     }
     handleFocusIn() {

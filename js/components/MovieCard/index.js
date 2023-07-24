@@ -1,4 +1,5 @@
 import { getMovieCredits, getMovieVideos, postFavoriteMovie, getFavMovies } from "../../movies-api.js";
+import { FeaturedMovie, featuredMovies } from "../MovieFeatured/index.js";
 class SpotlightMovie {
     constructor(data, target) {
         this.target = target;
@@ -16,8 +17,6 @@ class SpotlightMovie {
         this.credits = null;
         if (this.poster_path) {
             this.render(target);
-            // add a click event to the .movie-hover-play
-            this.element.querySelector('.add-to-favorites').addEventListener('click', this.addToFavorites.bind(this));
         }
     }
     render(target) {
@@ -25,7 +24,13 @@ class SpotlightMovie {
             <div class="movie-poster-wrapper">
                 <img src="https://image.tmdb.org/t/p/original${this.poster_path}" loading="lazy" alt="" class="movie-poster-image">
                 <div class="movie-poster-hover">
-                    <div class="button add-to-favorites">Add to Favorites</div> 
+                    <div class="button add-to-favorites">Add to Favorites</div>
+                    <div class="button watch-trailer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" version="1.1" viewBox="0 0 1200 1200" class="play-icon">
+                            <path d="m600 99.996c132.61 0 259.79 52.68 353.55 146.45 93.77 93.766 146.45 220.95 146.45 353.55s-52.68 259.79-146.45 353.55c-93.766 93.77-220.95 146.45-353.55 146.45s-259.79-52.68-353.55-146.45c-93.77-93.766-146.45-220.95-146.45-353.55 0.14844-132.56 52.875-259.66 146.61-353.39 93.738-93.734 220.83-146.46 353.39-146.61zm0-99.996c-159.13 0-311.74 63.215-424.27 175.73-112.52 112.52-175.73 265.14-175.73 424.27s63.215 311.74 175.73 424.27c112.52 112.52 265.14 175.73 424.27 175.73s311.74-63.215 424.27-175.73c112.52-112.52 175.73-265.14 175.73-424.27s-63.215-311.74-175.73-424.27c-112.52-112.52-265.14-175.73-424.27-175.73zm-150 850v-499.99l450 257.29z" fill="#fff"/>
+                        </svg>
+                        <div>Watch Trailer</div>
+                    </div> 
                 </div>
             </div>
             <h3>${this.title}</h3>
@@ -35,6 +40,10 @@ class SpotlightMovie {
             </div>
         `;
         this.element.innerHTML = html;
+        // add a click event to .button.add-to-favorites
+        this.element.querySelector('.button.add-to-favorites').addEventListener('click', this.addToFavorites.bind(this));
+        // add a click event to .button.watch-trailer
+        this.element.querySelector('.button.watch-trailer').addEventListener('click', this.watchTrailer.bind(this));
         target.appendChild(this.element);
     }
     handleVoteCount() {
@@ -152,7 +161,8 @@ class SpotlightMovie {
             backdrop.remove();
         });
     }
-    async addToFavorites() {
+    async addToFavorites(e) {
+        e.preventDefault();
         // Step 1. Check if movie is already in favorites
         // Step 2. Get the credits for the movie from themoviedb and save it to this.credits
         // Step 3. Get the videos for the movie from themoviedb and save it to this.videos
@@ -179,9 +189,30 @@ class SpotlightMovie {
             vote_average: this.vote_average,
             vote_count: this.vote_count
         }
-        let response = await postFavoriteMovie(movie);
-        console.log(response);
+        try {
+            let response = await postFavoriteMovie(movie);
+            console.log(response);
+            let featuredMovie = new FeaturedMovie(movie);
+            featuredMovies.push(featuredMovie);
+            featuredMovie.render('right');
+            document.querySelector('.search-wrapper').focusout();
+        } catch (error) {
+            console.log(error);
+        }
 
+    }
+    async watchTrailer() {
+        // Step 1. Get the videos for the movie from themoviedb and save it to this.videos
+        // Step 2. Open the trailer in a new window
+        if (!this.video) {
+            let video = await getMovieVideos(this.id);
+            this.video = video.results[0];
+        }
+        if (!this.video) {
+            alert('Sorry, there is no trailer for this movie');
+            return;
+        }
+        window.open(`https://www.youtube.com/watch?v=${this.video.key}`, '_blank');
     }
 
 }
