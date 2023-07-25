@@ -65,10 +65,6 @@ const patchFavMovie = async (movie) => {
     // let response = await fetch(url, options);
     // return await response.json();
     const response = await db.doc(movie.id).update(movie);
-    // get the document that was just updated
-    const snapshot = await db.doc(movie.id).get();
-    const updatedMovie = await snapshot.data();
-    return updatedMovie;
 }
 
 // Get featured movies from https://www.themoviedb.org/ API
